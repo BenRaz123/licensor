@@ -1,32 +1,14 @@
 use requestty::*;
 //use std::collections::HashMap;
-//use std::fs;
+use std::io::Write;
+use std::fs;
 
-fn main() -> Result<()> {
-    let mut list_of_questions: Vec<&str> = vec![
-        "GNU AGPL",
-        "GNU GPL",
-        "GNU LGPL",
-        "Mozila Public License",
-        "Apache License",
-        "MIT License",
-        "Boost Software License",
-        "The Unlicense",
-    ];
-
-    for question in &mut list_of_questions {
-        question.to_string();
-    }
-
-    let question = requestty::Question::select("licenses")
-        .message("Choose a license.")
-        .choices(list_of_questions)
-        .build();
-
-    let answer = requestty::prompt_one(question)?;
+fn main() -> std::io::Result<()> {
 
     let agpl: String = String::from(
-        r###" GNU AFFERO GENERAL PUBLIC LICENSE
+        r###"
+    GNU AFFERO GENERAL PUBLIC LICENSE
+    
         Version 3, 19 November 2007
 
     Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
@@ -2190,6 +2172,38 @@ limitations under the License."###,
     
     For more information, please refer to <https://unlicense.org>"###,
     );
+
+    let list_of_questions: Vec<&str> = vec![
+        "GNU AGPL",
+        "GNU GPL",
+        "GNU LGPL",
+        "Mozila Public License",
+        "Apache License",
+        "MIT License",
+        "Boost Software License",
+        "The Unlicense",
+    ];
+
+    let question = requestty::Question::select("licenses")
+        .message("Choose a license.")
+        .choices(list_of_questions)
+        .build();
+
+    let answer = requestty::prompt_one(question).expect("Failed to Answer Question");
+    
+    let mut file = fs::File::create("LICENSE")?;
+
+    match &answer.as_list_item().expect("Failed to Convert to list item").text[..] {
+        "GNU AGPL"                  => file.write_all(agpl.as_bytes())?,
+        "GNU GPL"                   => file.write_all(gpl.as_bytes())?,
+        "GNU LGPL"                  => file.write_all(lgpl.as_bytes())?,
+        "Mozilla Public License"    => file.write_all(mpl.as_bytes())?,
+        "Apache License"            => file.write_all(al.as_bytes())?,
+        "MIT License"               => file.write_all(ml.as_bytes())?,
+        "Boost Software License"    => file.write_all(bsl.as_bytes())?,
+        "The Unlicense"             => file.write_all(ul.as_bytes())?,
+        &_                          => println!("Segmentation Fault (Core dumped)")
+    }
 
     Ok(())
 }
