@@ -1,4 +1,4 @@
-# 📝 Licensor
+# ⚖️ Licensor
 
 ## What is this?
 
